@@ -3,6 +3,7 @@ name: iOS
 on:
   push:
     paths:
+      - ".gitmodules"
       - "CMakeLists.txt"
       - "**/workflows/build_ios.yml"
       - "**/source/**"

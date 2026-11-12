@@ -3,6 +3,7 @@ name: MacOS
 on:
   push:
     paths:
+      - ".gitmodules"
       - "CMakeLists.txt"
       - "**/workflows/build_macos.yml"
       - "**/source/**"

@@ -5,6 +5,7 @@ name: Android
 on:
   push:
     paths:
+      - ".gitmodules"
       - "CMakeLists.txt"
       - "**/workflows/build_android.yml"
       - "**/source/**"

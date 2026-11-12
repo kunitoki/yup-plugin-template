@@ -3,6 +3,7 @@ name: Linux
 on:
   push:
     paths:
+      - ".gitmodules"
       - "CMakeLists.txt"
       - "**/workflows/build_linux.yml"
       - "**/source/**"

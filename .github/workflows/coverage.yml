@@ -3,18 +3,20 @@ name: Coverage
 on:
   push:
     paths:
-      - "**/workflows/coverage.yml"
+      - ".gitmodules"
       - "CMakeLists.txt"
       - "codecov.yml"
+      - "**/workflows/coverage.yml"
       - "source/**"
       - "tests/**"
     branches:
       - "**"
   pull_request:
     paths:
-      - "**/workflows/coverage.yml"
+      - ".gitmodules"
       - "CMakeLists.txt"
       - "codecov.yml"
+      - "**/workflows/coverage.yml"
       - "source/**"
       - "tests/**"
     branches:
