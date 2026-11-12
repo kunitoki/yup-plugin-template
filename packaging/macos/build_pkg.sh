@@ -138,8 +138,9 @@ log "Created $OUTPUT_PKG"
 # cannot be notarized) and notarization credentials are available.
 # -----------------------------------------------------------------------------
 if [[ -z "${INSTALLER_SIGNING_IDENTITY:-}" ]]; then
-    [[ -n "${NOTARY_KEYCHAIN_PROFILE:-}${NOTARY_APPLE_ID:-}" ]] \
-        && warn "Notarization skipped: the installer is unsigned (set INSTALLER_SIGNING_IDENTITY)."
+    if [[ -n "${NOTARY_KEYCHAIN_PROFILE:-}${NOTARY_APPLE_ID:-}" ]]; then
+        warn "Notarization skipped: the installer is unsigned (set INSTALLER_SIGNING_IDENTITY)."
+    fi
 elif [[ -n "${NOTARY_KEYCHAIN_PROFILE:-}" ]]; then
     log "Notarizing with keychain profile: $NOTARY_KEYCHAIN_PROFILE"
     xcrun notarytool submit "$OUTPUT_PKG" --keychain-profile "$NOTARY_KEYCHAIN_PROFILE" --wait
