@@ -67,7 +67,7 @@ jobs:
         echo "archive=$(basename "$(ls dist/*-wasm.tar.gz | head -n1)")" >> "$GITHUB_OUTPUT"
 
     - name: Upload WASM archive
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ steps.package.outputs.archive }}
         path: dist/*-wasm.tar.gz
