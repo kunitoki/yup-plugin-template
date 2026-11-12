@@ -32,12 +32,14 @@ env:
     libasound2-dev libjack-jackd2-dev ladspa-sdk libcurl4-openssl-dev libfreetype6-dev
     libx11-dev libxcomposite-dev libxcursor-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev
     libxrandr-dev libxrender-dev libxfixes-dev libxss-dev libxtst-dev libxkbcommon-dev
-    libglu1-mesa-dev libegl1-mesa-dev mesa-common-dev lcov
+    libglu1-mesa-dev libegl1-mesa-dev mesa-common-dev libgl1-mesa-dri mesa-utils xvfb glibc-tools lcov
+  LIBGL_ALWAYS_SOFTWARE: "1"
+  GALLIUM_DRIVER: "llvmpipe"
   IGNORE_ERRORS: "mismatch,gcov,source,negative,unused,empty,format,corrupt"
 
 jobs:
   coverage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -73,7 +75,7 @@ jobs:
       working-directory: ${{ runner.workspace }}/build/tests/Debug
       run: |
         # Run tests and generate JUnit XML report
-        ./${{ env.PROJECT_NAME }}_tests --gtest_output=xml:test_results.xml || true
+        xvfb-run -a ./${{ env.PROJECT_NAME }}_tests --gtest_output=xml:test_results.xml || true
 
     - name: Generate Coverage Report
       working-directory: ${{ runner.workspace }}/build/tests/Debug
