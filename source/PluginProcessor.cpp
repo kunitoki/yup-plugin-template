@@ -9,6 +9,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+//==============================================================================
+
 namespace
 {
 constexpr float millisecondsToSeconds = 0.001f;
@@ -50,7 +52,6 @@ yup::AudioParameter::Ptr addSynthParameter (PluginProcessor& processor,
     }
     else
     {
-        // Percent parameters are stored as a 0..1 gain but shown as 0..100 %.
         const auto isPercent = unit == yup::AudioParameter::ParameterUnit::Percent;
         const yup::String suffix (yup::AudioParameter::getParameterUnitShortName (unit));
 
@@ -102,6 +103,7 @@ void PluginProcessor::prepareToPlay (const yup::AudioSpec& spec)
     engine.prepare (spec.sampleRate);
     gainSmoothed.reset (spec.sampleRate, 0.02);
     gainSmoothed.setCurrentAndTargetValue (gain->getValue());
+
     updateEngineParameters();
 }
 
@@ -113,8 +115,7 @@ void PluginProcessor::releaseResources()
 //==============================================================================
 void PluginProcessor::updateEngineParameters() noexcept
 {
-    engine.setEnvelope (attack->getValue() * millisecondsToSeconds,
-                        release->getValue() * millisecondsToSeconds);
+    engine.setEnvelope (attack->getValue() * millisecondsToSeconds, release->getValue() * millisecondsToSeconds);
     engine.setWaveform (static_cast<SynthWaveform> (static_cast<int> (waveform->getValue())));
 }
 
@@ -127,7 +128,6 @@ void PluginProcessor::processBlock (yup::AudioProcessContext<float>& context)
 
     updateEngineParameters();
 
-    // Merge the notes played by the editor's on-screen keyboard into the host MIDI.
     keyboardState.processNextMidiBuffer (context.midi, 0, numSamples, true);
 
     gainSmoothed.setTargetValue (gain->getValue());

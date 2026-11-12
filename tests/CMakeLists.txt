@@ -44,8 +44,10 @@ list (APPEND target_app_modules
     yup::yup_graphics)
 
 if (NOT YUP_PLATFORM_EMSCRIPTEN)
-    # yup_gui requires SDL video initialization which needs browser APIs
-    list (APPEND target_app_modules yup::yup_gui)
+    list (APPEND target_app_modules
+        yup::yup_gui
+        yup::yup_audio_processors
+        yup::yup_audio_gui)
     list (APPEND target_gtest_modules
         GTest::gtest
         GTest::gmock)
@@ -79,16 +81,31 @@ yup_standalone_app (
         ${target_gtest_modules})
 
 # ==== Setup test sources
-# The engine (source/dsp) is header-only and standard-library only, so the tests
-# include it directly without linking the audio or plugin-client modules.
-# main.cpp only provides the entry point via YUP's shared GoogleTest runner
-# (wired in below with yup_add_test_runner), so no runner code is vendored.
+# The engine (source/dsp) is header-only; on desktop the plugin implementation
+# sources (PluginProcessor/PluginEditor) are compiled in below so coverage
+# instruments the whole source/ tree, not just source/dsp.
 file (GLOB test_sources "${CMAKE_CURRENT_LIST_DIR}/test_*.cpp")
 list (APPEND test_sources "${CMAKE_CURRENT_LIST_DIR}/main.cpp")
+
+if (YUP_PLATFORM_EMSCRIPTEN)
+    # The plugin tests need yup_audio_processors/yup_audio_gui (desktop SDL
+    # video), so Emscripten covers only the DSP engine.
+    list (REMOVE_ITEM test_sources
+        "${CMAKE_CURRENT_LIST_DIR}/test_processor.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/test_editor.cpp")
+endif()
 
 target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../source")
 target_sources (${target_name} PRIVATE ${test_sources})
 source_group (TREE ${CMAKE_CURRENT_LIST_DIR}/ FILES ${test_sources})
+
+if (NOT YUP_PLATFORM_EMSCRIPTEN)
+    set (plugin_impl_sources
+        "${CMAKE_CURRENT_LIST_DIR}/../source/PluginProcessor.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/../source/PluginEditor.cpp")
+    target_sources (${target_name} PRIVATE ${plugin_impl_sources})
+    source_group ("Source Files" FILES ${plugin_impl_sources})
+endif()
 
 # ==== Reuse YUP's shared GoogleTest runner (adds the runner source + gtest link)
 yup_add_test_runner (${target_name})

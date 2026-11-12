@@ -10,10 +10,6 @@
 
 namespace
 {
-// Reference metrics, expressed at the editor's preferred size. Everything is
-// multiplied by a uniform scale factor in resized()/paint() so the layout keeps
-// its proportions at any window size (the editor preserves its aspect ratio, so
-// a single factor is enough and the knobs never turn into ovals).
 constexpr float referenceWidth = 520.0f;
 constexpr float referenceHeight = 320.0f;
 constexpr float titleHeight = 52.0f;
@@ -23,8 +19,6 @@ constexpr float knobPadding = 12.0f;
 constexpr float titleFontHeight = 26.0f;
 constexpr float captionFontHeight = 14.0f;
 
-// Two octaves give comfortably wide keys instead of the default 84-key span,
-// which renders as very thin keys in a compact plugin window.
 constexpr int keyboardLowestNote = 48;  // C3
 constexpr int keyboardHighestNote = 72; // C5
 } // namespace
@@ -56,8 +50,7 @@ PluginEditor::PluginEditor (PluginProcessor& processorToEdit)
 float PluginEditor::getScaleFactor() const
 {
     const auto bounds = getLocalBounds();
-    return yup::jmin (bounds.getWidth() / referenceWidth,
-                      bounds.getHeight() / referenceHeight);
+    return yup::jmin (bounds.getWidth() / referenceWidth, bounds.getHeight() / referenceHeight);
 }
 
 PluginEditor::~PluginEditor() = default;
@@ -97,10 +90,10 @@ void PluginEditor::bindKnob (Knob& knob, const yup::String& parameterID, const y
         knob.parameter,
         [this, knobPtr = &knob]
         {
-        updatingFromParameter = true;
-        knobPtr->slider.setValue (knobPtr->parameter->getValue(), yup::dontSendNotification);
-        updatingFromParameter = false;
-        updateCaption (*knobPtr);
+            updatingFromParameter = true;
+            knobPtr->slider.setValue (knobPtr->parameter->getValue(), yup::dontSendNotification);
+            updatingFromParameter = false;
+            updateCaption (*knobPtr);
         },
         true);
 
@@ -128,17 +121,13 @@ void PluginEditor::resized()
     title.setBounds (area.removeFromTop (titleHeight * scale));
 
     const auto columnWidth = area.getWidth() / static_cast<float> (knobs.size());
+    const auto captionH = captionHeight * scale;
 
     for (auto& knob : knobs)
     {
         auto column = area.removeFromLeft (columnWidth);
 
-        const auto captionH = captionHeight * scale;
-
-        // Keep rotary sliders circular by using a square, then stack the caption
-        // directly beneath it and centre the whole knob + caption group.
-        const auto side = yup::jmin (column.getWidth(), column.getHeight() - captionH)
-                        - knobPadding * scale * 2.0f;
+        const auto side = yup::jmin (column.getWidth(), column.getHeight() - captionH) - knobPadding * scale * 2.0f;
         const auto groupHeight = side + captionH;
         const auto groupTop = column.getY() + (column.getHeight() - groupHeight) * 0.5f;
         const auto centerX = column.getCenterX();
