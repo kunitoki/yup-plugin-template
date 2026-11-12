@@ -104,7 +104,17 @@ if (NOT YUP_PLATFORM_EMSCRIPTEN)
 endif()
 
 # ==== Setup coverage support
-if (ENABLE_COVERAGE)
-    _yup_setup_coverage_flags (${target_name})
+if (ENABLE_COVERAGE AND (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang"))
+    target_compile_options (${target_name} PRIVATE
+        --coverage
+        -fprofile-arcs
+        -ftest-coverage
+        -fprofile-update=atomic
+        "$<$<COMPILE_LANGUAGE:CXX>:-fno-elide-constructors>")
+    target_link_options (${target_name} PRIVATE --coverage)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        target_link_libraries (${target_name} PRIVATE gcov)
+    endif()
+
     _yup_setup_coverage_targets (${target_name} "")
 endif()

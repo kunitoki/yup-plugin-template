@@ -63,8 +63,8 @@ jobs:
     - name: Clean Coverage Data
       working-directory: ${{ runner.workspace }}/build/tests/Debug
       run: |
-        find . -name "*.gcda" -delete
-        lcov --directory . --zerocounters 2>/dev/null || true
+        find "${{ runner.workspace }}/build" -name "*.gcda" -delete
+        lcov --directory "${{ runner.workspace }}/build" --zerocounters 2>/dev/null || true
 
     - name: Run Tests
       working-directory: ${{ runner.workspace }}/build/tests/Debug
@@ -77,8 +77,9 @@ jobs:
       run: |
         mkdir -p coverage
 
-        # Capture coverage data
-        lcov --directory . --capture \
+        # Capture coverage data (the .gcda files live next to the object files
+        # under the build tree, not under tests/Debug).
+        lcov --directory "${{ runner.workspace }}/build" --capture \
           --output-file coverage/coverage.info \
           --ignore-errors ${IGNORE_ERRORS}
 

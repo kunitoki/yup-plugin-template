@@ -90,14 +90,10 @@ yup::AudioBusLayout PluginProcessor::makeBusLayout()
 PluginProcessor::PluginProcessor()
     : yup::AudioProcessor ("YupPlugin", makeBusLayout())
 {
-    gain = addSynthParameter (*this, "gain", "Gain", gainParam, { 0.0f, 1.0f }, 0.8f,
-                              yup::AudioParameter::ParameterUnit::Percent);
-    waveform = addSynthParameter (*this, "waveform", "Waveform", waveformParam, { 0.0f, 2.0f, 1.0f }, 0.0f,
-                                  yup::AudioParameter::ParameterUnit::Generic, { "Sine", "Saw", "Square" });
-    attack = addSynthParameter (*this, "attack", "Attack", attackParam, { 1.0f, 2000.0f }, 5.0f,
-                                yup::AudioParameter::ParameterUnit::Milliseconds);
-    release = addSynthParameter (*this, "release", "Release", releaseParam, { 1.0f, 2000.0f }, 150.0f,
-                                 yup::AudioParameter::ParameterUnit::Milliseconds);
+    gain = addSynthParameter (*this, "gain", "Gain", gainParam, { 0.0f, 1.0f }, 0.8f, yup::AudioParameter::ParameterUnit::Percent);
+    waveform = addSynthParameter (*this, "waveform", "Waveform", waveformParam, { 0.0f, 2.0f, 1.0f }, 0.0f, yup::AudioParameter::ParameterUnit::Generic, { "Sine", "Saw", "Square" });
+    attack = addSynthParameter (*this, "attack", "Attack", attackParam, { 1.0f, 2000.0f }, 5.0f, yup::AudioParameter::ParameterUnit::Milliseconds);
+    release = addSynthParameter (*this, "release", "Release", releaseParam, { 1.0f, 2000.0f }, 150.0f, yup::AudioParameter::ParameterUnit::Milliseconds);
 }
 
 //==============================================================================

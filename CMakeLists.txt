@@ -118,7 +118,12 @@ set (DEVELOPMENT_TEAM_ID "" CACHE STRING "Apple Developer Team ID")
 # PROJECT DECLARATION
 # =============================================================================
 
-project (${PROJECT_NAME} VERSION ${TARGET_VERSION})
+set (_template_project_languages C CXX)
+if (CMAKE_HOST_APPLE)
+  list (APPEND _template_project_languages OBJC OBJCXX)
+endif()
+
+project (${PROJECT_NAME} VERSION ${TARGET_VERSION} LANGUAGES ${_template_project_languages})
 
 # =============================================================================
 # YUP FRAMEWORK SETUP

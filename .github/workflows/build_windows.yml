@@ -42,16 +42,19 @@ jobs:
       run: choco install innosetup --no-progress -y
 
     - name: Package
+      id: package
       shell: pwsh
-      run: >-
-        packaging/windows/build_installer.ps1
-        -Config Release
-        -BuildDir "${{ runner.workspace }}/build"
-        -Iscc "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+      run: |
+        packaging/windows/build_installer.ps1 `
+          -Config Release `
+          -BuildDir "${{ runner.workspace }}/build" `
+          -Iscc "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+        $file = (Get-ChildItem dist/*.exe | Select-Object -First 1).Name
+        "file=$file" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
 
     - name: Upload installer
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.PROJECT_NAME }}-Windows
+        name: ${{ steps.package.outputs.file }}
         path: dist/*.exe
         if-no-files-found: error

@@ -33,7 +33,9 @@ public:
 
     //==============================================================================
     bool isResizable() const override { return true; }
+
     yup::Size<int> getPreferredSize() const override { return { 520, 320 }; }
+
     bool shouldPreserveAspectRatio() const override { return true; }
 
     //==============================================================================

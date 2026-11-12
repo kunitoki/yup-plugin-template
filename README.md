@@ -133,9 +133,6 @@ Toggle formats and features with CMake options, e.g. `-DPLUGIN_BUILD_VST3=OFF`:
 `PLUGIN_BUILD_CLAP`, `PLUGIN_BUILD_VST3`, `PLUGIN_BUILD_AU`, `PLUGIN_BUILD_AUV3`, `PLUGIN_BUILD_LV2`,
 `PLUGIN_BUILD_STANDALONE`, `BUILD_TESTS`, `ENABLE_COVERAGE`, `ENABLE_CODE_SIGNING`.
 
-See [`docs/CONFIGURATION.md`](docs/CONFIGURATION.md) and [`docs/COVERAGE.md`](docs/COVERAGE.md) for
-the full reference.
-
 ## Project layout
 
 ```
@@ -147,7 +144,6 @@ the full reference.
 │   └── dsp/                # Header-only synth engine
 ├── tests/                  # GoogleTest suite
 ├── packaging/              # macOS / Windows / Linux installer scripts
-├── docs/                   # Configuration and coverage guides
 ├── .github/workflows/      # Per-platform CI
 └── yup/                    # YUP framework (git submodule)
 ```

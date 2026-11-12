@@ -52,18 +52,24 @@ public:
 
     //==============================================================================
     int getCurrentPreset() const noexcept override { return 0; }
+
     void setCurrentPreset (int) noexcept override {}
+
     int getNumPresets() const override { return 0; }
+
     yup::String getPresetName (int) const override { return {}; }
+
     void setPresetName (int, yup::StringRef) override {}
 
     //==============================================================================
     bool supportsDataTreeState() const noexcept override { return true; }
+
     yup::Result loadStateFromDataTree (const yup::DataTree& state) override;
     yup::Result saveStateIntoDataTree (yup::DataTree& state) override;
 
     //==============================================================================
     bool hasEditor() const override { return true; }
+
     yup::AudioProcessorEditor* createEditor() override;
 
     //==============================================================================

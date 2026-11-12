@@ -97,10 +97,10 @@ void PluginEditor::bindKnob (Knob& knob, const yup::String& parameterID, const y
         knob.parameter,
         [this, knobPtr = &knob]
         {
-            updatingFromParameter = true;
-            knobPtr->slider.setValue (knobPtr->parameter->getValue(), yup::dontSendNotification);
-            updatingFromParameter = false;
-            updateCaption (*knobPtr);
+        updatingFromParameter = true;
+        knobPtr->slider.setValue (knobPtr->parameter->getValue(), yup::dontSendNotification);
+        updatingFromParameter = false;
+        updateCaption (*knobPtr);
         },
         true);
 
@@ -156,4 +156,3 @@ void PluginEditor::paint (yup::Graphics& g)
     g.setFillColor (0xff1d1f24);
     g.fillAll();
 }
-

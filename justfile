@@ -105,3 +105,19 @@ package CONFIG="Release":
 package CONFIG="Release":
   pwsh packaging/windows/build_installer.ps1 -Config {{CONFIG}}
 
+# =============================================================================
+# TEMPLATE / DEVELOPER TOOLING
+# =============================================================================
+
+[doc("rename the template for your own plugin (interactive)")]
+bootstrap:
+  ./scripts/bootstrap.sh
+
+[doc("format all source files with clang-format")]
+format:
+  find source tests -type f \( -name '*.h' -o -name '*.cpp' \) -print0 | xargs -0 clang-format -i
+
+[doc("check source formatting without modifying files")]
+format-check:
+  find source tests -type f \( -name '*.h' -o -name '*.cpp' \) -print0 | xargs -0 clang-format --dry-run --Werror
+
