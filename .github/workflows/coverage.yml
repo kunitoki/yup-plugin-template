@@ -112,7 +112,7 @@ jobs:
 
     - name: Upload Coverage to Codecov
       if: ${{ env.CODECOV_TOKEN != '' }}
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v7
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ${{ runner.workspace }}/build/tests/Debug/coverage/coverage_final.info

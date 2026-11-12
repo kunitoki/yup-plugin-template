@@ -12,9 +12,10 @@ on:
       - "**/tests/**"
     branches:
       - "**"
+  workflow_call:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: build_android-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -68,3 +69,15 @@ jobs:
       - name: Build Release
         working-directory: ${{ runner.workspace }}/build
         run: ./gradlew assemble
+
+      - name: Package
+        id: package
+        run: |
+          BUILD_DIR="${{ runner.workspace }}/build" bash packaging/android/build_apk.sh Release
+          echo "apk=$(basename "$(ls dist/*-android.apk | head -n1)")" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.apk }}
+          path: dist/*-android.apk
