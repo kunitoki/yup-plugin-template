@@ -24,9 +24,15 @@ jobs:
   wasm:
     uses: ./.github/workflows/build_wasm.yml
 
+  ios:
+    uses: ./.github/workflows/build_ios.yml
+
+  android:
+    uses: ./.github/workflows/build_android.yml
+
   release:
     name: Publish Release
-    needs: [macos, windows, linux, wasm]
+    needs: [macos, windows, linux, wasm, ios, android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -48,3 +54,5 @@ jobs:
             artifacts/**/*.exe
             artifacts/**/*.tar.gz
             artifacts/**/*.deb
+            artifacts/**/*.ipa
+            artifacts/**/*.apk

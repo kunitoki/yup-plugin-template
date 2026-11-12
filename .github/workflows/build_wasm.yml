@@ -40,7 +40,7 @@ jobs:
         submodules: 'true'
 
     - name: Setup emsdk
-      uses: mymindstorm/setup-emsdk@v14
+      uses: mymindstorm/setup-emsdk@v16
       with:
         version: ${{ env.EM_VERSION }}
 
