@@ -1,0 +1,57 @@
+name: Windows
+
+on:
+  push:
+    paths:
+      - "CMakeLists.txt"
+      - "**/workflows/build_windows.yml"
+      - "**/source/**"
+      - "**/tests/**"
+      - "**/packaging/**"
+      - "VERSION"
+    branches:
+      - "**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROJECT_NAME: YupPlugin
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: 'true'
+
+    - name: Configure
+      run: cmake ${{ github.workspace }} -B ${{ runner.workspace }}/build
+
+    - name: Build Debug
+      run: cmake --build ${{ runner.workspace }}/build --config Debug --target ${{ env.PROJECT_NAME }}
+
+    - name: Build Release
+      run: cmake --build ${{ runner.workspace }}/build --config Release --target ${{ env.PROJECT_NAME }}
+
+    - name: Install Inno Setup
+      run: choco install innosetup --no-progress -y
+
+    - name: Package
+      shell: pwsh
+      run: >-
+        packaging/windows/build_installer.ps1
+        -Config Release
+        -BuildDir "${{ runner.workspace }}/build"
+        -Iscc "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+
+    - name: Upload installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.PROJECT_NAME }}-Windows
+        path: dist/*.exe
+        if-no-files-found: error

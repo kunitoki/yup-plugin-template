@@ -1,0 +1,58 @@
+name: Android
+
+# See https://medium.com/@dcostalloyd90/automating-android-builds-with-github-actions-a-step-by-step-guide-2a02a54f59cd
+
+on:
+  push:
+    paths:
+      - "CMakeLists.txt"
+      - "**/workflows/build_android.yml"
+      - "**/source/**"
+      - "**/tests/**"
+    branches:
+      - "**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROJECT_NAME: YupPlugin
+  JAVA_VERSION: 17
+  JAVA_DISTRIBUTION: 'temurin'
+  NDK_VERSION: r26d
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: ${{env.JAVA_DISTRIBUTION}}
+          java-version: ${{env.JAVA_VERSION}}
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: ${{env.NDK_VERSION}}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: 'true'
+
+      - name: Configure
+        run: cmake ${{ github.workspace }} -G "Ninja Multi-Config" -B ${{ runner.workspace }}/build -DYUP_TARGET_ANDROID=ON
+
+      - name: Build Debug
+        working-directory: ${{ runner.workspace }}/build/${{ env.PROJECT_NAME }}/app
+        run: ./gradlew assembleDebug
+
+      - name: Build Release
+        working-directory: ${{ runner.workspace }}/build/${{ env.PROJECT_NAME }}/app
+        run: ./gradlew assemble

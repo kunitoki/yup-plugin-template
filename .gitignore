@@ -1,0 +1,61 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Cruft
+.DS_Store
+
+# Intermediates
+build/*
+cmake-build*
+out/*
+
+# Packaging output
+dist/
+
+# Ides/Agents
+.vscode/
+.idea/
+.vs/
+.claude/
+.pytest_cache/
+.cache/
+
+# Coverage files
+*.gcda
+*.gcno
+*.gcov
+coverage/
+*.info
+lcov.info
+coverage.xml
+htmlcov/

@@ -1,0 +1,49 @@
+name: MacOS
+
+on:
+  push:
+    paths:
+      - "CMakeLists.txt"
+      - "**/workflows/build_macos.yml"
+      - "**/source/**"
+      - "**/tests/**"
+      - "**/packaging/**"
+      - "VERSION"
+    branches:
+      - "**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROJECT_NAME: YupPlugin
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: 'true'
+
+    - name: Configure
+      run: cmake ${{ github.workspace }} -G "Ninja Multi-Config" -B ${{ runner.workspace }}/build
+
+    - name: Build Debug
+      run: cmake --build ${{ runner.workspace }}/build --config Debug --target ${{ env.PROJECT_NAME }}
+
+    - name: Build Release
+      run: cmake --build ${{ runner.workspace }}/build --config Release --target ${{ env.PROJECT_NAME }}
+
+    - name: Package
+      run: BUILD_DIR="${{ runner.workspace }}/build" bash packaging/macos/build_pkg.sh Release
+
+    - name: Upload installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.PROJECT_NAME }}-macOS
+        path: dist/*.pkg
+        if-no-files-found: error

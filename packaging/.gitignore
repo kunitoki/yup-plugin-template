@@ -1,0 +1,8 @@
+# Packaging scratch / generated output.
+# Finished installers are written to the top-level dist/ directory (ignored in
+# the root .gitignore); everything else in this folder is tracked.
+*.pkg
+*.dmg
+*.deb
+*.exe
+*.tar.gz

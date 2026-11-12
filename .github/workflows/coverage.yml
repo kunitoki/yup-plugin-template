@@ -1,0 +1,128 @@
+name: Coverage
+
+on:
+  push:
+    paths:
+      - "**/workflows/coverage.yml"
+      - "CMakeLists.txt"
+      - "codecov.yml"
+      - "source/**"
+      - "tests/**"
+    branches:
+      - "**"
+  pull_request:
+    paths:
+      - "**/workflows/coverage.yml"
+      - "CMakeLists.txt"
+      - "codecov.yml"
+      - "source/**"
+      - "tests/**"
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROJECT_NAME: YupPlugin
+  INSTALL_DEPS: >-
+    libasound2-dev libjack-jackd2-dev ladspa-sdk libcurl4-openssl-dev libfreetype6-dev
+    libx11-dev libxcomposite-dev libxcursor-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev
+    libxrandr-dev libxrender-dev libglu1-mesa-dev libegl1-mesa-dev mesa-common-dev lcov
+  IGNORE_ERRORS: "mismatch,gcov,source,negative,unused,empty,format,corrupt"
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: 'true'
+
+    - name: Install Dependencies
+      run: sudo apt-get update && sudo apt-get install -y ${INSTALL_DEPS}
+
+    - name: Configure CMake with Coverage
+      run: |
+        cmake ${{ github.workspace }} -B ${{ runner.workspace }}/build \
+          -G "Ninja Multi-Config" \
+          -DBUILD_TESTS=ON \
+          -DENABLE_COVERAGE=ON \
+          -DCMAKE_BUILD_TYPE=Debug
+
+    - name: Build Tests
+      working-directory: ${{ runner.workspace }}/build
+      run: cmake --build . --config Debug --target ${{ env.PROJECT_NAME }}_tests
+
+    - name: Clean Coverage Data
+      working-directory: ${{ runner.workspace }}/build/tests/Debug
+      run: |
+        find . -name "*.gcda" -delete
+        lcov --directory . --zerocounters 2>/dev/null || true
+
+    - name: Run Tests
+      working-directory: ${{ runner.workspace }}/build/tests/Debug
+      run: |
+        # Run tests and generate JUnit XML report
+        ./${{ env.PROJECT_NAME }}_tests --gtest_output=xml:test_results.xml || true
+
+    - name: Generate Coverage Report
+      working-directory: ${{ runner.workspace }}/build/tests/Debug
+      run: |
+        mkdir -p coverage
+
+        # Capture coverage data
+        lcov --directory . --capture \
+          --output-file coverage/coverage.info \
+          --ignore-errors ${IGNORE_ERRORS}
+
+        # Remove unwanted files from coverage
+        lcov --remove coverage/coverage.info \
+          "*/tests/*" \
+          "*/build/*" \
+          "*/usr/*" \
+          "*/opt/*" \
+          --output-file coverage/coverage_final.info \
+          --ignore-errors ${IGNORE_ERRORS}
+
+        # Display coverage summary
+        lcov --list coverage/coverage_final.info
+
+    - name: Generate HTML Coverage Report
+      working-directory: ${{ runner.workspace }}/build/tests/Debug
+      run: |
+        genhtml coverage/coverage_final.info \
+          --output-directory coverage/html \
+          --title "${{ env.PROJECT_NAME }} Coverage Report" \
+          --legend \
+          --show-details
+
+    - name: Upload Coverage to Codecov
+      if: ${{ env.CODECOV_TOKEN != '' }}
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ${{ runner.workspace }}/build/tests/Debug/coverage/coverage_final.info
+        name: ${{ env.PROJECT_NAME }}-coverage
+        fail_ci_if_error: false
+        verbose: true
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: ${{ runner.workspace }}/build/tests/Debug/test_results.xml
+
+    - name: Upload Coverage Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-reports
+        path: ${{ runner.workspace }}/build/tests/Debug/coverage/html

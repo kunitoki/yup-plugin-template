@@ -1,0 +1,41 @@
+name: iOS
+
+on:
+  push:
+    paths:
+      - "CMakeLists.txt"
+      - "**/workflows/build_ios.yml"
+      - "**/source/**"
+      - "**/tests/**"
+    branches:
+      - "**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROJECT_NAME: YupPlugin
+  IOS_PLATFORM: OS64
+  IOS_TOOLCHAIN_PATH: yup/cmake/toolchains/ios.cmake
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: 'true'
+
+    - name: Configure
+      run: |
+        cmake ${{ github.workspace }} -G "Ninja Multi-Config" -DCMAKE_TOOLCHAIN_FILE=${{ env.IOS_TOOLCHAIN_PATH }} \
+          -DPLATFORM=${{ env.IOS_PLATFORM }} -B ${{ runner.workspace }}/build
+
+    - name: Build Debug
+      run: cmake --build ${{ runner.workspace }}/build --config Debug --target ${{ env.PROJECT_NAME }}
+
+    - name: Build Release
+      run: cmake --build ${{ runner.workspace }}/build --config Release --target ${{ env.PROJECT_NAME }}
