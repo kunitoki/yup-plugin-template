@@ -99,6 +99,7 @@ set (TARGET_VERSION "${CURRENT_VERSION}" CACHE STRING "Plugin version")
 # =============================================================================
 
 option (BUILD_TESTS "Build test suite" ON)
+option (BUILD_BENCHMARKS "Build the DSP micro-benchmarks (google/benchmark)" ON)
 option (ENABLE_COVERAGE "Enable code coverage analysis (requires lcov/gcov)" OFF)
 option (ENABLE_CODE_SIGNING "Enable code signing (macOS/iOS)" OFF)
 
@@ -149,7 +150,6 @@ file (GLOB_RECURSE PLUGIN_SOURCES
 )
 
 source_group (TREE ${CMAKE_CURRENT_SOURCE_DIR}/source PREFIX "Source Files" FILES ${PLUGIN_SOURCES})
-
 
 # =============================================================================
 # AAX (optional, auto-detected)
@@ -240,4 +240,9 @@ if (BUILD_TESTS AND NOT YUP_PLATFORM_MOBILE)
     enable_testing()
     add_subdirectory (tests)
     message (STATUS "Building test suite")
+endif()
+
+if (BUILD_BENCHMARKS AND NOT YUP_PLATFORM_MOBILE AND NOT YUP_PLATFORM_EMSCRIPTEN)
+    add_subdirectory (benchmarks)
+    message (STATUS "Building DSP benchmarks")
 endif()

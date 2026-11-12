@@ -64,9 +64,35 @@ PRODUCT_NAME="My Synth" BUILD_DIR=/path/to/build DIST_DIR=/tmp/out \
   packaging/macos/build_pkg.sh Release
 ```
 
-### Signing
+### Signing & notarization
 
-- **macOS**: set `INSTALLER_SIGNING_IDENTITY` to a `Developer ID Installer: ...` identity to sign the
-  `.pkg`. (Sign the plugin bundles themselves via `ENABLE_CODE_SIGNING` at build time.)
-- **Windows**: generate your own `AppId` GUID in `windows/installer.iss` for a real product, and sign
-  the resulting installer with `signtool`.
+The default build is **unsigned** — every signing step is skipped unless you provide credentials, so
+the template builds out of the box. Provide the values below to opt in.
+
+#### macOS
+
+`packaging/macos/build_pkg.sh` reads these environment variables:
+
+| Variable | Purpose |
+|----------|---------|
+| `APPLICATION_SIGNING_IDENTITY` | `Developer ID Application: ...` — codesigns the plugin/app bundles with the hardened runtime. |
+| `INSTALLER_SIGNING_IDENTITY` | `Developer ID Installer: ...` — signs the `.pkg`. Required before notarization. |
+| `NOTARY_KEYCHAIN_PROFILE` | A stored `notarytool` keychain profile, **or**… |
+| `NOTARY_APPLE_ID` / `NOTARY_TEAM_ID` / `NOTARY_PASSWORD` | …an Apple ID + Team ID + app-specific password triple. |
+
+Notarization (`xcrun notarytool submit --wait` + `xcrun stapler staple`) runs only when the installer
+is signed **and** notarization credentials are present.
+
+In CI (`.github/workflows/build_macos.yml`) set these repository secrets to enable signing:
+`APPLE_DEVELOPER_ID_CERT_P12` (base64 of the exported `.p12`), `APPLE_DEVELOPER_ID_CERT_PASSWORD`,
+`APPLE_APPLICATION_IDENTITY`, `APPLE_INSTALLER_IDENTITY`, and for notarization
+`APPLE_NOTARY_APPLE_ID`, `APPLE_NOTARY_TEAM_ID`, `APPLE_NOTARY_PASSWORD`.
+
+#### Windows
+
+Generate your own `AppId` GUID in `windows/installer.iss` for a real product. CI
+(`.github/workflows/build_windows.yml`) signs the installer with
+[Azure Trusted Signing](https://learn.microsoft.com/azure/trusted-signing/) when these repository
+secrets are set: `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`,
+`AZURE_SIGNING_ENDPOINT`, `AZURE_SIGNING_ACCOUNT`, `AZURE_SIGNING_CERT_PROFILE`. To sign locally
+instead, use `signtool` against `dist/*.exe`.

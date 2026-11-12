@@ -1,42 +1,26 @@
+/*
+  ==============================================================================
+
+   YUP Plugin Template - TEST application.
+
+   This application runs the test suite for the YUP Plugin Template using
+   Google Test. Run this application with `just test` (or build the `*_tests`
+   target with -DBUILD_TESTS=ON and execute it directly).
+
+  ==============================================================================
+*/
+
 #include <gtest/gtest.h>
+
+#include "helpers/Helpers.h"
 
 #include "PluginProcessor.h"
 
 #include <cmath>
 
-namespace
-{
-float blockPeak (const yup::AudioBuffer<float>& audio)
-{
-    float peak = 0.0f;
-    for (int channel = 0; channel < audio.getNumChannels(); ++channel)
-    {
-        const auto* data = audio.getReadPointer (channel);
-        for (int sample = 0; sample < audio.getNumSamples(); ++sample)
-            peak = std::max (peak, std::abs (data[sample]));
-    }
-    return peak;
-}
-
-bool blockIsFinite (const yup::AudioBuffer<float>& audio)
-{
-    for (int channel = 0; channel < audio.getNumChannels(); ++channel)
-    {
-        const auto* data = audio.getReadPointer (channel);
-        for (int sample = 0; sample < audio.getNumSamples(); ++sample)
-            if (! std::isfinite (data[sample]))
-                return false;
-    }
-    return true;
-}
-
-void renderBlock (PluginProcessor& processor, yup::AudioBuffer<float>& audio, yup::MidiBuffer& midi)
-{
-    yup::ParameterChangeBuffer params;
-    yup::AudioProcessContext<float> context { audio, midi, params };
-    processor.processBlock (context);
-}
-} // namespace
+using test::blockIsFinite;
+using test::blockPeak;
+using test::renderBlock;
 
 TEST (PluginProcessor, ExposesFourParametersWithExpectedDefaults)
 {

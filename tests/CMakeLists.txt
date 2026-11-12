@@ -81,21 +81,18 @@ yup_standalone_app (
         ${target_gtest_modules})
 
 # ==== Setup test sources
-# The engine (source/dsp) is header-only; on desktop the plugin implementation
-# sources (PluginProcessor/PluginEditor) are compiled in below so coverage
-# instruments the whole source/ tree, not just source/dsp.
 file (GLOB test_sources "${CMAKE_CURRENT_LIST_DIR}/test_*.cpp")
 list (APPEND test_sources "${CMAKE_CURRENT_LIST_DIR}/main.cpp")
 
 if (YUP_PLATFORM_EMSCRIPTEN)
-    # The plugin tests need yup_audio_processors/yup_audio_gui (desktop SDL
-    # video), so Emscripten covers only the DSP engine.
     list (REMOVE_ITEM test_sources
         "${CMAKE_CURRENT_LIST_DIR}/test_PluginProcessor.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/test_PluginEditor.cpp")
 endif()
 
-target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../source")
+target_include_directories (${target_name} PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}"
+    "${CMAKE_CURRENT_LIST_DIR}/../source")
 target_sources (${target_name} PRIVATE ${test_sources})
 source_group (TREE ${CMAKE_CURRENT_LIST_DIR}/ FILES ${test_sources})
 
@@ -105,6 +102,10 @@ if (NOT YUP_PLATFORM_EMSCRIPTEN)
         "${CMAKE_CURRENT_LIST_DIR}/../source/PluginEditor.cpp")
     target_sources (${target_name} PRIVATE ${plugin_impl_sources})
     source_group ("Source Files" FILES ${plugin_impl_sources})
+
+    set (test_helper_headers "${CMAKE_CURRENT_LIST_DIR}/helpers/Helpers.h")
+    target_sources (${target_name} PRIVATE ${test_helper_headers})
+    source_group (TREE ${CMAKE_CURRENT_LIST_DIR}/ FILES ${test_helper_headers})
 endif()
 
 # ==== Reuse YUP's shared GoogleTest runner (adds the runner source + gtest link)

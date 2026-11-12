@@ -20,6 +20,16 @@ concurrency:
 
 env:
   PROJECT_NAME: YupPlugin
+  SCCACHE_GHA_ENABLED: "true"
+  # Optional code-signing / notarization. Leave the secrets unset to produce an
+  # unsigned installer (the default). See packaging/README.md for the full list.
+  APPLE_CERT_BASE64: ${{ secrets.APPLE_DEVELOPER_ID_CERT_P12 }}
+  APPLE_CERT_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_CERT_PASSWORD }}
+  APPLE_APPLICATION_IDENTITY: ${{ secrets.APPLE_APPLICATION_IDENTITY }}
+  APPLE_INSTALLER_IDENTITY: ${{ secrets.APPLE_INSTALLER_IDENTITY }}
+  APPLE_NOTARY_APPLE_ID: ${{ secrets.APPLE_NOTARY_APPLE_ID }}
+  APPLE_NOTARY_TEAM_ID: ${{ secrets.APPLE_NOTARY_TEAM_ID }}
+  APPLE_NOTARY_PASSWORD: ${{ secrets.APPLE_NOTARY_PASSWORD }}
 
 jobs:
   build:
@@ -31,8 +41,11 @@ jobs:
         fetch-depth: 0
         submodules: 'true'
 
+    - name: Setup sccache
+      uses: mozilla-actions/sccache-action@v0.0.9
+
     - name: Configure
-      run: cmake ${{ github.workspace }} -G "Ninja Multi-Config" -B ${{ runner.workspace }}/build
+      run: cmake ${{ github.workspace }} -G "Ninja Multi-Config" -B ${{ runner.workspace }}/build -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
     - name: Build Debug
       run: cmake --build ${{ runner.workspace }}/build --config Debug --target ${{ env.PROJECT_NAME }}
@@ -40,8 +53,30 @@ jobs:
     - name: Build Release
       run: cmake --build ${{ runner.workspace }}/build --config Release --target ${{ env.PROJECT_NAME }}
 
+    - name: Import signing certificate
+      if: env.APPLE_CERT_BASE64 != ''
+      run: |
+        KEYCHAIN="$RUNNER_TEMP/app-signing.keychain-db"
+        KEYCHAIN_PASSWORD="$(openssl rand -base64 24)"
+        echo "$APPLE_CERT_BASE64" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+        security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+        security set-keychain-settings -lut 21600 "$KEYCHAIN"
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+        security import "$RUNNER_TEMP/cert.p12" -P "$APPLE_CERT_PASSWORD" \
+          -A -t cert -f pkcs12 -k "$KEYCHAIN"
+        security set-key-partition-list -S apple-tool:,apple:,codesign: \
+          -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+        security list-keychain -d user -s "$KEYCHAIN" login.keychain
+        rm -f "$RUNNER_TEMP/cert.p12"
+
     - name: Package
       id: package
+      env:
+        APPLICATION_SIGNING_IDENTITY: ${{ env.APPLE_APPLICATION_IDENTITY }}
+        INSTALLER_SIGNING_IDENTITY: ${{ env.APPLE_INSTALLER_IDENTITY }}
+        NOTARY_APPLE_ID: ${{ env.APPLE_NOTARY_APPLE_ID }}
+        NOTARY_TEAM_ID: ${{ env.APPLE_NOTARY_TEAM_ID }}
+        NOTARY_PASSWORD: ${{ env.APPLE_NOTARY_PASSWORD }}
       run: |
         BUILD_DIR="${{ runner.workspace }}/build" bash packaging/macos/build_pkg.sh Release
         echo "file=$(basename "$(ls dist/*.pkg | head -n1)")" >> "$GITHUB_OUTPUT"

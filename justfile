@@ -13,16 +13,16 @@ clean:
 
 [doc("generate and open project using Ninja multi config")]
 ninja PROFILING="OFF":
-  cmake -G "Ninja Multi-Config" -B build -DYUP_ENABLE_PROFILING={{PROFILING}}
+  cmake -G "Ninja Multi-Config" -B build -DYUP_ENABLE_PROFILING={{PROFILING}} -DBUILD_BENCHMARKS=ON
 
 [doc("generate and open project in macOS using Xcode")]
 mac PROFILING="OFF":
-  cmake -G Xcode -B build -DYUP_ENABLE_PROFILING={{PROFILING}}
+  cmake -G Xcode -B build -DYUP_ENABLE_PROFILING={{PROFILING}} -DBUILD_BENCHMARKS=ON
   -open build/YupPlugin.xcodeproj
 
 [doc("generate and open project in Windows using Visual Studio")]
 win PROFILING="OFF":
-  cmake -G "Visual Studio 18 2026" -B build -DYUP_ENABLE_PROFILING={{PROFILING}}
+  cmake -G "Visual Studio 18 2026" -B build -DYUP_ENABLE_PROFILING={{PROFILING}} -DBUILD_BENCHMARKS=ON
   -start build/YupPlugin.slnx
 
 [doc("generate project in Linux using Ninja")]
@@ -84,6 +84,12 @@ build CONFIG="Release":
 test CONFIG="Debug":
   cmake --build build --config {{CONFIG}} --target YupPlugin_tests
   ctest --test-dir build/tests -C {{CONFIG}} --output-on-failure
+
+[doc("build and run the DSP micro-benchmarks (google/benchmark)")]
+bench CONFIG="Release":
+  cmake -G "Ninja Multi-Config" -B build -DBUILD_BENCHMARKS=ON
+  cmake --build build --config {{CONFIG}} --target YupPlugin_benchmarks
+  ./build/benchmarks/{{CONFIG}}/YupPlugin_benchmarks
 
 [doc("generate platform icons (.icns/.ico) from assets/app-icon.png")]
 icons:

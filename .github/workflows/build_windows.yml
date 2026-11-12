@@ -20,6 +20,14 @@ concurrency:
 
 env:
   PROJECT_NAME: YupPlugin
+  # Optional Azure Trusted Signing of the installer. Leave the secrets unset to
+  # produce an unsigned installer (the default). See packaging/README.md.
+  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  AZURE_SIGNING_ENDPOINT: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+  AZURE_SIGNING_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+  AZURE_SIGNING_CERT_PROFILE: ${{ secrets.AZURE_SIGNING_CERT_PROFILE }}
 
 jobs:
   build:
@@ -53,6 +61,22 @@ jobs:
           -Iscc "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
         $file = (Get-ChildItem dist/*.exe | Select-Object -First 1).Name
         "file=$file" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+    - name: Sign installer (Azure Trusted Signing)
+      if: env.AZURE_TENANT_ID != ''
+      uses: azure/trusted-signing-action@v0
+      with:
+        azure-tenant-id: ${{ env.AZURE_TENANT_ID }}
+        azure-client-id: ${{ env.AZURE_CLIENT_ID }}
+        azure-client-secret: ${{ env.AZURE_CLIENT_SECRET }}
+        endpoint: ${{ env.AZURE_SIGNING_ENDPOINT }}
+        trusted-signing-account-name: ${{ env.AZURE_SIGNING_ACCOUNT }}
+        certificate-profile-name: ${{ env.AZURE_SIGNING_CERT_PROFILE }}
+        files-folder: ${{ github.workspace }}/dist
+        files-folder-filter: exe
+        file-digest: SHA256
+        timestamp-rfc3161: http://timestamp.acs.microsoft.com
+        timestamp-digest: SHA256
 
     - name: Upload installer
       uses: actions/upload-artifact@v4
