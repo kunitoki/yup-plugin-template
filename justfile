@@ -105,6 +105,10 @@ package CONFIG="Release":
 package CONFIG="Release":
   pwsh packaging/windows/build_installer.ps1 -Config {{CONFIG}}
 
+[doc("archive the Emscripten WASM standalone build (.tar.gz)")]
+package-wasm CONFIG="Release":
+  ./packaging/wasm/build_archive.sh {{CONFIG}}
+
 # =============================================================================
 # TEMPLATE / DEVELOPER TOOLING
 # =============================================================================

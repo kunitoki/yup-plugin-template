@@ -1,16 +1,18 @@
 ; ============================================================================
 ;  Inno Setup script for the YUP plugin template (Windows installer).
 ;
-;  Build with Inno Setup's command line compiler (ISCC), passing the values
-;  that normally come from CMake as /D defines, for example:
+;  This script installs the plugin formats and standalone application from a
+;  staging directory that packaging\windows\build_installer.ps1 populates from
+;  the CMake build tree. The helper script passes the staging path and the
+;  Have* defines (one per format that was actually built):
 ;
 ;    iscc packaging\windows\installer.iss ^
+;         /DMyAppId=28F190D9-1045-4E2D-B7BC-F7D875542C27 ^
 ;         /DMyAppVersion=1.0.0 ^
-;         /DBuildDir=..\..\build ^
-;         /DConfig=Release
+;         /DStageDir=C:\path\to\dist\win-stage ^
+;         /DHaveVst3=1 /DHaveClap=1 /DHaveLv2=1 /DHaveStandalone=1
 ;
-;  The helper script packaging\windows\build_installer.ps1 fills these in for
-;  you from the VERSION file and CMake configuration.
+;  Run it through packaging\windows\build_installer.ps1 rather than by hand.
 ; ============================================================================
 
 ; Unique application id. Generate your own GUID for a real product (e.g. `powershell [guid]::NewGuid()`).
@@ -32,11 +34,8 @@
 #ifndef MyAppURL
   #define MyAppURL "https://github.com/kunitoki/yup-plugin-template"
 #endif
-#ifndef BuildDir
-  #define BuildDir "..\..\build"
-#endif
-#ifndef Config
-  #define Config "Release"
+#ifndef StageDir
+  #define StageDir "..\..\dist\win-stage"
 #endif
 #ifndef OutputDir
   #define OutputDir "..\..\dist"
@@ -68,33 +67,47 @@ Name: "full"; Description: "Full installation"
 Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "vst3";       Description: "VST3 plugin";          Types: full custom
-Name: "clap";       Description: "CLAP plugin";          Types: full custom
-Name: "lv2";        Description: "LV2 plugin";           Types: full custom
+#ifdef HaveVst3
+Name: "vst3";       Description: "VST3 plugin";            Types: full custom
+#endif
+#ifdef HaveClap
+Name: "clap";       Description: "CLAP plugin";            Types: full custom
+#endif
+#ifdef HaveLv2
+Name: "lv2";        Description: "LV2 plugin";             Types: full custom
+#endif
+#ifdef HaveStandalone
 Name: "standalone"; Description: "Standalone application"; Types: full custom
+#endif
 
 [Files]
-; VST3 lives in a format-specific subdirectory of the build tree.
-Source: "{#BuildDir}\VST3\{#Config}\{#MyAppProject}_vst3_plugin.vst3\*"; \
-    DestDir: "{commoncf64}\VST3\{#MyAppProject}_vst3_plugin.vst3"; \
-    Flags: recursesubdirs createallsubdirs skipifsourcedoesntexist ignoreversion; Components: vst3
-
-Source: "{#BuildDir}\{#Config}\{#MyAppProject}_clap_plugin.clap"; \
-    DestDir: "{commoncf64}\CLAP"; \
-    Flags: skipifsourcedoesntexist ignoreversion; Components: clap
-
-Source: "{#BuildDir}\{#Config}\{#MyAppProject}_lv2_plugin.lv2\*"; \
-    DestDir: "{commoncf64}\LV2\{#MyAppProject}_lv2_plugin.lv2"; \
-    Flags: recursesubdirs createallsubdirs skipifsourcedoesntexist ignoreversion; Components: lv2
-
-Source: "{#BuildDir}\{#Config}\{#MyAppProject}_standalone_plugin.exe"; \
-    DestDir: "{app}"; DestName: "{#MyAppName}.exe"; \
-    Flags: skipifsourcedoesntexist ignoreversion; Components: standalone
+#ifdef HaveVst3
+; VST3 is a single "<name>.vst3" DLL (or a bundle folder); install it into the
+; shared VST3 directory read by every host.
+Source: "{#StageDir}\VST3\*"; DestDir: "{commoncf64}\VST3"; \
+    Flags: recursesubdirs createallsubdirs ignoreversion; Components: vst3
+#endif
+#ifdef HaveClap
+Source: "{#StageDir}\CLAP\*"; DestDir: "{commoncf64}\CLAP"; \
+    Flags: ignoreversion; Components: clap
+#endif
+#ifdef HaveLv2
+Source: "{#StageDir}\LV2\*"; DestDir: "{commoncf64}\LV2"; \
+    Flags: recursesubdirs createallsubdirs ignoreversion; Components: lv2
+#endif
+#ifdef HaveStandalone
+Source: "{#StageDir}\Standalone\*"; DestDir: "{app}"; \
+    Flags: ignoreversion; Components: standalone
+#endif
 
 [Icons]
+#ifdef HaveStandalone
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppName}.exe"; Components: standalone
+#endif
 Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
 
 [Run]
+#ifdef HaveStandalone
 Filename: "{app}\{#MyAppName}.exe"; Description: "Launch {#MyAppName}"; \
     Flags: nowait postinstall skipifsilent; Components: standalone
+#endif

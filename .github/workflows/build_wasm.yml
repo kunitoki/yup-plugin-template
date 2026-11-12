@@ -56,3 +56,16 @@ jobs:
     - name: Build Release
       run: |
         cmake --build ${{ runner.workspace }}/build --config Release --target ${{ env.PROJECT_NAME }}
+
+    - name: Package
+      id: package
+      run: |
+        BUILD_DIR="${{ runner.workspace }}/build" bash packaging/wasm/build_archive.sh Release
+        echo "archive=$(basename "$(ls dist/*-wasm.tar.gz | head -n1)")" >> "$GITHUB_OUTPUT"
+
+    - name: Upload WASM archive
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.package.outputs.archive }}
+        path: dist/*-wasm.tar.gz
+        if-no-files-found: error
