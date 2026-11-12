@@ -12,6 +12,8 @@ packaging/
 ├── linux/build_archive.sh    # Build a Linux .tar.gz
 ├── linux/build_deb.sh        # Build a Debian .deb package
 ├── linux/app.desktop.in      # Desktop entry template for the standalone app
+├── android/build_apk.sh      # Collect the Android .apk from the Gradle build
+├── ios/build_ipa.sh          # Package the iOS standalone .app into an .ipa
 └── windows/
     ├── installer.iss         # Inno Setup script
     └── build_installer.ps1   # Helper that invokes ISCC with the right defines
@@ -31,8 +33,17 @@ Or call the scripts directly (they accept `[CONFIG] [BUILD_DIR]` and honour the 
 packaging/macos/build_pkg.sh Release
 packaging/linux/build_archive.sh Release
 packaging/linux/build_deb.sh Release
+packaging/android/build_apk.sh Release
+packaging/ios/build_ipa.sh Release
 pwsh packaging/windows/build_installer.ps1 -Config Release
 ```
+
+The mobile scripts package the outputs of the respective platform builds: run the
+Android Gradle build (`./gradlew assemble`) or the iOS CMake build first, then the
+script copies the `.apk` / `.ipa` into `dist/`. Both the Android and iOS CI
+workflows run these automatically and upload the result as a build artifact (and
+attach it to a tagged GitHub Release). The generated `.ipa` is **unsigned** — fine
+as an artifact, but device installation still requires code signing.
 
 ## Install locations
 

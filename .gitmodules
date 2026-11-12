@@ -1,4 +1,4 @@
 [submodule "yup"]
 	path = yup
 	url = https://github.com/kunitoki/yup.git
-	branch = dev/test_runner
+	branch = main
