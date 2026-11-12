@@ -77,7 +77,7 @@ jobs:
           echo "apk=$(basename "$(ls dist/*-android.apk | head -n1)")" >> "$GITHUB_OUTPUT"
 
       - name: Upload Android APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.package.outputs.apk }}
           path: dist/*-android.apk

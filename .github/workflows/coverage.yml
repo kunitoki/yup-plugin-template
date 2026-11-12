@@ -121,14 +121,14 @@ jobs:
         verbose: true
 
     - name: Upload Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: test-results
         path: ${{ runner.workspace }}/build/tests/Debug/test_results.xml
 
     - name: Upload Coverage Reports
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: coverage-reports
