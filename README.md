@@ -1,4 +1,18 @@
-# YUP Plugin Template
+<p align="center">
+  <img src="assets/app-icon.png" alt="YUP Plugin Template" width="160" height="160">
+</p>
+
+<h1 align="center">YUP Plugin Template</h1>
+
+<p align="center">
+  <a href="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_macos.yml"><img src="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_macos.yml/badge.svg" alt="macOS"></a>
+  <a href="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_windows.yml"><img src="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_windows.yml/badge.svg" alt="Windows"></a>
+  <a href="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_linux.yml"><img src="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_linux.yml/badge.svg" alt="Linux"></a>
+  <a href="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_ios.yml"><img src="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_ios.yml/badge.svg" alt="iOS"></a>
+  <a href="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_android.yml"><img src="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_android.yml/badge.svg" alt="Android"></a>
+  <a href="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_wasm.yml"><img src="https://github.com/kunitoki/yup-plugin-template/actions/workflows/build_wasm.yml/badge.svg" alt="WebAssembly"></a>
+  <a href="https://github.com/kunitoki/yup-plugin-template/actions/workflows/coverage.yml"><img src="https://github.com/kunitoki/yup-plugin-template/actions/workflows/coverage.yml/badge.svg" alt="Coverage"></a>
+</p>
 
 A cross-platform **audio plugin** template built with the [YUP](https://github.com/kunitoki/yup)
 framework. It ships as a small polyphonic instrument you can rename and extend, and builds to every
