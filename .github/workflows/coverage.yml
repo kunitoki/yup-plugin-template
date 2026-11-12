@@ -94,6 +94,7 @@ jobs:
           "*/build/*" \
           "*/usr/*" \
           "*/opt/*" \
+          "*/yup/*" \
           --output-file coverage/coverage_final.info \
           --ignore-errors ${IGNORE_ERRORS}
 
