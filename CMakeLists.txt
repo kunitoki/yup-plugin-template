@@ -150,6 +150,7 @@ file (GLOB_RECURSE PLUGIN_SOURCES
 
 source_group (TREE ${CMAKE_CURRENT_SOURCE_DIR}/source PREFIX "Source Files" FILES ${PLUGIN_SOURCES})
 
+
 # =============================================================================
 # AAX (optional, auto-detected)
 # =============================================================================
