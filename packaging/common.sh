@@ -43,13 +43,14 @@ die()  { printf '\033[1;31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 
 # Find the first bundle/file with the given extension produced by the build.
 # Searches the common config directory as well as the VST3-specific subtree,
-# skipping third-party bundles under externals/.
+# skipping third-party bundles under externals/ and the test/benchmark runners
+# (e.g. "<project>_tests.app") which must never be shipped in a package.
 # Usage: find_artifact <extension>
 find_artifact() {
     local ext="$1"
-    find "$BUILD_DIR" \
+    { find "$BUILD_DIR" \
         \( -path '*/externals/*' -o -path '*/_deps/*' \) -prune -o \
         -path "*/$CONFIG/*" -name "*.$ext" -print 2>/dev/null \
-        | grep -v '\.dSYM' \
-        | head -n 1
+        | grep -Ev '(\.dSYM|_tests\.|_benchmarks\.)' \
+        | head -n 1; } || true
 }
