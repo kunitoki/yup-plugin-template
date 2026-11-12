@@ -91,8 +91,8 @@ if (YUP_PLATFORM_EMSCRIPTEN)
     # The plugin tests need yup_audio_processors/yup_audio_gui (desktop SDL
     # video), so Emscripten covers only the DSP engine.
     list (REMOVE_ITEM test_sources
-        "${CMAKE_CURRENT_LIST_DIR}/test_processor.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/test_editor.cpp")
+        "${CMAKE_CURRENT_LIST_DIR}/test_PluginProcessor.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/test_PluginEditor.cpp")
 endif()
 
 target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../source")
